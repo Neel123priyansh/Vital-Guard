@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import video from "../src/assets/Intro_video.mp4"
+import logo from "../src/assets/logo.png"
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 function  Header() {
@@ -13,18 +14,19 @@ function  Header() {
     <div className="fixed top-[4%] left-0 right-0 z-50 flex flex-col items-center">
       <div className="w-[80%] rounded-full backdrop-blur-lg  bg-white/5 border-b border-white/10 bg-[#f7efd8]">
         <div className="flex justify-between items-center px-6 md:px-16 h-16 md:h-17">
-          <h1 onClick={() => navigate("/Check")} className="text-2xl md:text-3xl font-bold text-white cursor-pointer select-none">
+          <div className="flex flex-row-reverse ">
+          <h1 className="text-2xl md:text-3xl font-bold text-white cursor-pointer select-none">
             VitalGuard. <br/> <h1 className="text-[10px] text-[#2ee8a0] ml-1 font-Raleway">by Raphson Robotics</h1>
-            
           </h1>
+          <img src={logo} className="h-12 w-12 mr-2"/>
+          </div>
 
           {/* Desktop Nav */}
           <ul className="hidden md:flex flex-row text-base text-white gap-1 font-semibold">
             {navItems.map((item) => (
               <li
                 key={item}
-                className="px-4 py-2 cursor-pointer hover:border-b-2 hover:border-white/60 transition-all duration-150"
-              >
+                className="px-4 py-2 cursor-pointer hover:border-b-2 hover:border-white/60 transition-all duration-150">
                 {item}
               </li>
             ))}

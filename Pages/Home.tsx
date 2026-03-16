@@ -21,6 +21,7 @@ export const Home = () => {
     // <Text/>
     // <About/>
     // <People/>
+    
     // <Footer/> 
     // {/* <Why/>
     // <Step/> */}
