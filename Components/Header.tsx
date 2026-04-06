@@ -7,8 +7,19 @@ import logo from "../src/assets/logo.png"
 function  Header() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
-  
-  const navItems = ["Dashboard", "About Us", "Contact Us", "Login"];
+
+  const isLoggedIn = !!localStorage.getItem("vg_token");
+
+  const navItems = ["Dashboard", "About Us", "Contact Us", isLoggedIn ? "Dashboard" : "Login"];
+
+  const handleNavClick = (item: string) => {
+    if (item === "Login") {
+      navigate("/login");
+    } else if (item === "Dashboard") {
+      navigate(isLoggedIn ? "/dashboard" : "/login");
+    }
+    setMenuOpen(false);
+  };
 
   return (
     <div className="fixed top-[4%] left-0 right-0 z-50 flex flex-col items-center">
@@ -23,10 +34,15 @@ function  Header() {
 
           {/* Desktop Nav */}
           <ul className="hidden md:flex flex-row text-base text-white gap-1 font-semibold">
-            {navItems.map((item) => (
+            {navItems.map((item, idx) => (
               <li
-                key={item}
-                className="px-4 py-2 cursor-pointer hover:border-b-2 hover:border-white/60 transition-all duration-150">
+                key={item + idx}
+                onClick={() => handleNavClick(item)}
+                className={`px-4 py-2 cursor-pointer hover:border-b-2 hover:border-white/60 transition-all duration-150 ${
+                  (item === "Login" || (item === "Dashboard" && idx === navItems.length - 1))
+                    ? "bg-[#2ee8a0]/10 rounded-full hover:bg-[#2ee8a0]/20 hover:border-b-0 text-[#2ee8a0]"
+                    : ""
+                }`}>
                 {item}
               </li>
             ))}
@@ -47,11 +63,11 @@ function  Header() {
         {/* Mobile Dropdown */}
         <div className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${menuOpen ? "max-h-72 opacity-100" : "max-h-0 opacity-0"} bg-black/60 backdrop-blur-md`}>
           <ul className="flex flex-col text-base text-white font-semibold px-6 py-2">
-            {navItems.map((item) => (
+            {navItems.map((item, idx) => (
               <li
-                key={item}
+                key={item + idx}
                 className="py-4 border-b border-white/20 last:border-b-0 cursor-pointer hover:pl-2 transition-all duration-150"
-                onClick={() => setMenuOpen(false)}
+                onClick={() => handleNavClick(item)}
               >
                 {item}
               </li>
