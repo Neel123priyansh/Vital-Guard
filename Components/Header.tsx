@@ -4,7 +4,7 @@ import video from "../src/assets/Intro_video.mp4"
 import logo from "../src/assets/logo.png"
 
 // ─── Header ───────────────────────────────────────────────────────────────────
-function  Header() {
+function Header() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
@@ -26,10 +26,10 @@ function  Header() {
       <div className="w-[80%] rounded-full backdrop-blur-lg  bg-white/5 border-b border-white/10 bg-[#f7efd8]">
         <div className="flex justify-between items-center px-6 md:px-16 h-16 md:h-17">
           <div className="flex flex-row-reverse ">
-          <h1 className="text-2xl md:text-3xl font-bold text-white cursor-pointer select-none">
-            VitalGuard. <br/> <h1 className="text-[10px] text-[#2ee8a0] ml-1 font-Raleway">by Raphson Robotics</h1>
-          </h1>
-          <img src={logo} className="h-12 w-12 mr-2"/>
+            <h1 className="text-2xl md:text-4xl font-bold text-white cursor-pointer select-none">
+              VitalGuard.  {/*  <h1 className="text-[10px] text-[#2ee8a0] ml-1 font-Raleway">by Raphson Robotics</h1> */}
+            </h1>
+            <img src={logo} className="h-12 w-12 mr-2" />
           </div>
 
           {/* Desktop Nav */}
@@ -38,11 +38,10 @@ function  Header() {
               <li
                 key={item + idx}
                 onClick={() => handleNavClick(item)}
-                className={`px-4 py-2 cursor-pointer hover:border-b-2 hover:border-white/60 transition-all duration-150 ${
-                  (item === "Login" || (item === "Dashboard" && idx === navItems.length - 1))
-                    ? "bg-[#2ee8a0]/10 rounded-full hover:bg-[#2ee8a0]/20 hover:border-b-0 text-[#2ee8a0]"
-                    : ""
-                }`}>
+                className={`px-4 py-2 cursor-pointer hover:border-b-2 hover:border-white/60 transition-all duration-150 ${(item === "Login" || (item === "Dashboard" && idx === navItems.length - 1))
+                  ? "bg-[#2ee8a0]/10 rounded-full hover:bg-[#2ee8a0]/20 hover:border-b-0 text-[#2ee8a0]"
+                  : ""
+                  }`}>
                 {item}
               </li>
             ))}
@@ -132,17 +131,16 @@ function Main() {
 
       {/* Hero text content */}
       <div
-        className={`relative z-20 h-full flex flex-col justify-end px-6 md:px-55 pb-16 md:pb-24 max-w-full transition-all duration-[900ms] ease-out ${
-          loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
-        }`}>
-          <p className="text-[11px] font-Raleway font-bold tracking-[0.18em] w-full text-white/60 uppercase mb-4">Our Promise</p>
-          <h1 className="text-[clamp(2rem,5vw,3.8rem)] font-Raleway text-white w-full leading-[1.12] tracking-tight mb-8">
-             More intelligent healthcare for all with{" "}<em className="not-italic text-[#2ee8a0]">single device</em>{" "}diagnostics.
-          </h1>
+        className={`relative z-20 h-full flex flex-col justify-end px-6 md:px-55 pb-16 md:pb-24 max-w-full transition-all duration-[900ms] ease-out ${loaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+          }`}>
+        <p className="text-[11px] font-Raleway font-bold tracking-[0.18em] w-full text-white/60 uppercase mb-4">Our Promise</p>
+        <h1 className="text-[clamp(2rem,5vw,3.8rem)] font-Raleway text-white w-full leading-[1.12] tracking-tight mb-8">
+          More intelligent healthcare for all with{" "}<em className="not-italic text-[#2ee8a0]">single device</em>{" "}diagnostics.
+        </h1>
         <a
           href="#technology"
           className="inline-flex items-center backdrop-blur-lg  bg-white/5 border-b border-white/10 gap-2.5 px-6 py-3 border rounded-full text-white text-xl font-semibold w-fit bg-transparent transition-all duration-200 hover:bg-[#2ee8a0]/15 hover:border-[#2ee8a0] hover:text-[#2ee8a0] no-underline group">
-            Our Technology
+          Our Technology
         </a>
       </div>
 
