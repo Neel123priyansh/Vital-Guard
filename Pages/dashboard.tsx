@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { db } from "../src/firebase";
 import { ref, onValue } from "firebase/database";
 import logo from "../src/assets/logo.png";
+import axios from "axios";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface UserData {
@@ -196,6 +197,7 @@ function MetricCard({
     icon,
     accent,
     sensorName,
+    isDarkMode,
     children,
 }: {
     label: string;
@@ -204,10 +206,14 @@ function MetricCard({
     icon: React.ReactNode;
     accent: string;
     sensorName: string;
+    isDarkMode: boolean;
     children?: React.ReactNode;
 }) {
     return (
-        <div className="backdrop-blur-xl bg-white/[0.03] border border-white/[0.07] rounded-2xl p-6 hover:bg-white/[0.05] hover:border-white/[0.12] transition-all duration-500 group relative overflow-hidden">
+        <div className={`backdrop-blur-xl border rounded-2xl p-6 transition-all duration-500 group relative overflow-hidden ${isDarkMode
+            ? "bg-white/[0.03] border-white/[0.07] hover:bg-white/[0.05] hover:border-white/[0.12]"
+            : "bg-white border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-md"
+            }`}>
             {/* Subtle corner glow */}
             <div
                 className="absolute -top-12 -right-12 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"
@@ -219,7 +225,8 @@ function MetricCard({
             <div className="relative z-10">
                 {/* Header row */}
                 <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] font-Raleway">
+                    <span className={`text-[10px] font-bold uppercase tracking-[0.2em] font-Raleway ${isDarkMode ? "text-white/30" : "text-slate-400"
+                        }`}>
                         {label}
                     </span>
                     <div
@@ -252,7 +259,8 @@ function MetricCard({
                     >
                         {value}
                     </span>
-                    <span className="text-sm text-white/30 font-Raleway font-medium">
+                    <span className={`text-sm font-Raleway font-medium ${isDarkMode ? "text-white/30" : "text-slate-400"
+                        }`}>
                         {unit}
                     </span>
                 </div>
@@ -285,6 +293,7 @@ export default function Dashboard() {
     const navigate = useNavigate();
     const [user, setUser] = useState<UserData | null>(null);
     const [mounted, setMounted] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState(true);
 
     // Sensor state
     const [ecgBuffer, setEcgBuffer] = useState<number[]>([]);
@@ -294,6 +303,15 @@ export default function Dashboard() {
     const [altitude, setAltitude] = useState<number>(0);
     const [spo2, setSpo2] = useState<number>(0);
     const [firebaseConnected, setFirebaseConnected] = useState(false);
+
+    // AI Chat State
+    const [isChatOpen, setIsChatOpen] = useState(false);
+    const [messages, setMessages] = useState<{ role: 'user' | 'ai', text: string }[]>([
+        { role: 'ai', text: 'Namaste! I am VitalGuard AI. How can I help with your health today?' }
+    ]);
+    const [chatInput, setChatInput] = useState('');
+    const [isTyping, setIsTyping] = useState(false);
+    const [vitalsHistory, setVitalsHistory] = useState<any[]>([]);
 
     const MAX_ECG_POINTS = 300;
 
@@ -316,7 +334,7 @@ export default function Dashboard() {
     // ── Firebase Realtime Listeners ──
     useEffect(() => {
         // ECG value (AD8232 pushes individual readings)
-        const ecgRef = ref(db, "sensorData/ecg");
+        const ecgRef = ref(db, "healthData/ecg");
         const unsubEcg = onValue(ecgRef, (snapshot) => {
             const val = snapshot.val();
             if (val !== null && val !== undefined) {
@@ -331,35 +349,35 @@ export default function Dashboard() {
         });
 
         // BPM (MAX30100)
-        const bpmRef = ref(db, "sensorData/bpm");
+        const bpmRef = ref(db, "healthData/heartRate");
         const unsubBpm = onValue(bpmRef, (snapshot) => {
             const val = snapshot.val();
             if (val !== null) setBpm(Number(val));
         });
 
         // Temperature
-        const tempRef = ref(db, "sensorData/temperature");
+        const tempRef = ref(db, "healthData/temperature");
         const unsubTemp = onValue(tempRef, (snapshot) => {
             const val = snapshot.val();
             if (val !== null) setTemperature(Number(val));
         });
 
         // Pressure (BMP-280)
-        const pressRef = ref(db, "sensorData/pressure");
+        const pressRef = ref(db, "healthData/pressure");
         const unsubPress = onValue(pressRef, (snapshot) => {
             const val = snapshot.val();
             if (val !== null) setPressure(Number(val));
         });
 
         // Altitude (BMP-280)
-        const altRef = ref(db, "sensorData/altitude");
+        const altRef = ref(db, "healthData/altitude");
         const unsubAlt = onValue(altRef, (snapshot) => {
             const val = snapshot.val();
             if (val !== null) setAltitude(Number(val));
         });
 
         // SpO2 (MAX30100)
-        const spo2Ref = ref(db, "sensorData/spo2");
+        const spo2Ref = ref(db, "healthData/spo2");
         const unsubSpo2 = onValue(spo2Ref, (snapshot) => {
             const val = snapshot.val();
             if (val !== null) setSpo2(Number(val));
@@ -374,6 +392,41 @@ export default function Dashboard() {
             unsubSpo2();
         };
     }, []);
+
+    // ── Update History ──
+    useEffect(() => {
+        if (bpm > 0 || temperature > 0 || spo2 > 0) {
+            setVitalsHistory(prev => {
+                const newEntry = { bpm, temperature, spo2, time: new Date().toLocaleTimeString() };
+                const updated = [newEntry, ...prev].slice(0, 5); // Keep latest 5
+                return updated;
+            });
+        }
+    }, [bpm, temperature, spo2]);
+
+    // ── Chat Logic ──
+    const handleSendMessage = async () => {
+        if (!chatInput.trim()) return;
+
+        const userMsg = chatInput;
+        setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
+        setChatInput('');
+        setIsTyping(true);
+
+        try {
+            const response = await axios.post('http://localhost:8000/api/chat', {
+                message: userMsg,
+                vitals: { bpm, temperature, spo2, history: vitalsHistory }
+            });
+
+            setMessages(prev => [...prev, { role: 'ai', text: response.data.reply }]);
+        } catch (error) {
+            console.error("Chat error:", error);
+            setMessages(prev => [...prev, { role: 'ai', text: "Sorry, I'm having trouble connecting to my brain. Is the LLM server running?" }]);
+        } finally {
+            setIsTyping(false);
+        }
+    };
 
     // ── Logout ──
     const handleLogout = () => {
@@ -420,26 +473,26 @@ export default function Dashboard() {
                 : { text: "Waiting…", color: "#64748b" };
 
     return (
-        <div className="min-h-screen w-full bg-[#010b10] relative overflow-hidden">
+        <div className={`min-h-screen w-full transition-colors duration-500 relative overflow-hidden ${isDarkMode ? "bg-[#010b10] text-white" : "bg-[#f8fafc] text-slate-900"
+            }`}>
             {/* ── Background ── */}
             <div className="absolute inset-0 pointer-events-none">
                 <div
-                    className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full opacity-[0.04]"
+                    className={`absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full transition-opacity duration-1000 ${isDarkMode ? 'opacity-[0.04]' : 'opacity-[0.08]'}`}
                     style={{
                         background: "radial-gradient(circle, #2ee8a0 0%, transparent 70%)",
                     }}
                 />
                 <div
-                    className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full opacity-[0.03]"
+                    className={`absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full transition-opacity duration-1000 ${isDarkMode ? 'opacity-[0.03]' : 'opacity-[0.06]'}`}
                     style={{
                         background: "radial-gradient(circle, #0f7eee 0%, transparent 70%)",
                     }}
                 />
                 <div
-                    className="absolute inset-0 opacity-[0.015]"
+                    className={`absolute inset-0 transition-opacity duration-1000 ${isDarkMode ? 'opacity-[0.015]' : 'opacity-[0.03]'}`}
                     style={{
-                        backgroundImage:
-                            "linear-gradient(rgba(46,232,160,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(46,232,160,0.4) 1px, transparent 1px)",
+                        backgroundImage: `linear-gradient(${isDarkMode ? 'rgba(46,232,160,0.4)' : 'rgba(46,232,160,0.2)'} 1px, transparent 1px), linear-gradient(90deg, ${isDarkMode ? 'rgba(46,232,160,0.4)' : 'rgba(46,232,160,0.2)'} 1px, transparent 1px)`,
                         backgroundSize: "80px 80px",
                     }}
                 />
@@ -454,29 +507,44 @@ export default function Dashboard() {
                         alt="VitalGuard"
                     />
                     <div>
-                        <h1 className="text-base font-bold text-white leading-tight">
+                        <h1 className={`text-lg font-bold leading-tight ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
                             VitalGuard.
                         </h1>
-                        <p className="text-[8px] text-[#2ee8a0] font-Raleway">
-                            by Raphson Robotics
-                        </p>
                     </div>
                 </Link>
 
                 <div className="flex items-center gap-2">
+                    {/* Theme Toggle */}
+                    <button
+                        onClick={() => setIsDarkMode(!isDarkMode)}
+                        className={`p-2 rounded-lg border transition-all duration-300 ${isDarkMode
+                            ? 'bg-white/[0.03] border-white/[0.06] text-amber-400 hover:bg-white/[0.08]'
+                            : 'bg-slate-200/50 border-slate-200 text-amber-600 hover:bg-slate-200'
+                            }`}
+                        title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                    >
+                        {isDarkMode ? (
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z" /></svg>
+                        ) : (
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                        )}
+                    </button>
+
                     {/* Connection status */}
-                    <div className="hidden md:flex items-center gap-1.5 mr-3 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+                    <div className={`hidden md:flex items-center gap-1.5 mr-3 px-3 py-1.5 rounded-lg border transition-colors duration-300 ${isDarkMode ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-slate-200/50 border-slate-200'
+                        }`}>
                         <StatusDot connected={firebaseConnected} />
-                        <span className="text-[10px] font-Raleway font-semibold text-white/40 uppercase tracking-wider">
+                        <span className={`text-[10px] font-Raleway font-semibold uppercase tracking-wider ${isDarkMode ? 'text-white/40' : 'text-slate-500'
+                            }`}>
                             {firebaseConnected ? "Live" : "Offline"}
                         </span>
                     </div>
 
                     <div className="hidden md:flex flex-col items-end mr-2">
-                        <span className="text-white text-xs font-semibold font-Raleway">
+                        <span className={`text-xs font-semibold font-Raleway ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
                             {user.name}
                         </span>
-                        <span className="text-white/30 text-[10px] font-Raleway">
+                        <span className={`text-[10px] font-Raleway ${isDarkMode ? 'text-white/30' : 'text-slate-400'}`}>
                             {user.email}
                         </span>
                     </div>
@@ -500,17 +568,21 @@ export default function Dashboard() {
                 {/* Page title */}
                 <div className="mb-5">
                     <div className="flex items-center gap-2 mb-1">
-                        <p className="text-[10px] font-Raleway font-bold tracking-[0.2em] text-white/30 uppercase">
+                        <p className={`text-[10px] font-Raleway font-bold tracking-[0.2em] uppercase ${isDarkMode ? "text-white/30" : "text-slate-400"
+                            }`}>
                             Health Monitor
                         </p>
-                        <div className="md:hidden flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white/[0.03] border border-white/[0.06]">
+                        <div className={`md:hidden flex items-center gap-1.5 px-2 py-0.5 rounded-md border ${isDarkMode ? "bg-white/[0.03] border-white/[0.06]" : "bg-slate-100 border-slate-200"
+                            }`}>
                             <StatusDot connected={firebaseConnected} />
-                            <span className="text-[9px] font-Raleway font-semibold text-white/40 uppercase tracking-wider">
+                            <span className={`text-[9px] font-Raleway font-semibold uppercase tracking-wider ${isDarkMode ? "text-white/40" : "text-slate-500"
+                                }`}>
                                 {firebaseConnected ? "Live" : "Offline"}
                             </span>
                         </div>
                     </div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-white font-Raleway tracking-tight">
+                    <h1 className={`text-2xl md:text-3xl font-bold font-Raleway tracking-tight ${isDarkMode ? "text-white" : "text-slate-800"
+                        }`}>
                         Real-time Vitals
                     </h1>
                 </div>
@@ -518,17 +590,19 @@ export default function Dashboard() {
                 {/* ════════════════════════════════════════════════════════════════════
             ECG MONITOR
         ════════════════════════════════════════════════════════════════════ */}
-                <div className="backdrop-blur-xl bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden mb-5">
+                <div className={`backdrop-blur-xl border rounded-2xl overflow-hidden mb-5 ${isDarkMode ? "bg-white/[0.02] border-white/[0.06]" : "bg-white border-slate-200 shadow-sm"
+                    }`}>
                     {/* ECG header bar */}
-                    <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.05]">
+                    <div className={`flex items-center justify-between px-5 py-3 border-b ${isDarkMode ? "border-white/[0.05]" : "border-slate-100"
+                        }`}>
                         <div className="flex items-center gap-3">
                             <div className="flex items-center gap-2">
                                 <HeartBeat bpm={bpm} />
                                 <div className="ml-1">
-                                    <h2 className="text-sm font-bold text-white font-Raleway">
+                                    <h2 className={`text-sm font-bold font-Raleway ${isDarkMode ? "text-white" : "text-slate-800"}`}>
                                         ECG Monitor
                                     </h2>
-                                    <p className="text-[9px] text-white/30 font-Raleway uppercase tracking-widest">
+                                    <p className={`text-[9px] font-Raleway uppercase tracking-widest ${isDarkMode ? "text-white/30" : "text-slate-400"}`}>
                                         AD8232 ECG Module
                                     </p>
                                 </div>
@@ -547,7 +621,7 @@ export default function Dashboard() {
                             )}
                             <div className="flex items-center gap-1.5">
                                 <StatusDot connected={firebaseConnected} />
-                                <span className="text-[10px] text-white/30 font-Raleway">
+                                <span className={`text-[10px] font-Raleway ${isDarkMode ? "text-white/30" : "text-slate-400"}`}>
                                     {ecgBuffer.length} pts
                                 </span>
                             </div>
@@ -609,6 +683,7 @@ export default function Dashboard() {
                         unit="BPM"
                         sensorName="MAX30100"
                         accent="#ef4444"
+                        isDarkMode={isDarkMode}
                         icon={
                             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="#ef4444" opacity={0.8}>
                                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
@@ -643,6 +718,7 @@ export default function Dashboard() {
                         unit="°C"
                         sensorName="Temp Sensor"
                         accent="#f59e0b"
+                        isDarkMode={isDarkMode}
                         icon={
                             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth={1.5} opacity={0.8}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -690,6 +766,7 @@ export default function Dashboard() {
                         unit="hPa"
                         sensorName="BMP-280"
                         accent="#0f7eee"
+                        isDarkMode={isDarkMode}
                         icon={
                             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="#0f7eee" strokeWidth={1.5} opacity={0.8}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
@@ -749,6 +826,7 @@ export default function Dashboard() {
                         unit="%"
                         sensorName="MAX30100"
                         accent="#ec4899"
+                        isDarkMode={isDarkMode}
                         icon={
                             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="#ec4899" strokeWidth={1.5} opacity={0.8}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
@@ -803,6 +881,7 @@ export default function Dashboard() {
                         unit="m"
                         sensorName="BMP-280"
                         accent="#a855f7"
+                        isDarkMode={isDarkMode}
                         icon={
                             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth={1.5} opacity={0.8}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 15l4-4 4 4 8-8v4" />
@@ -820,16 +899,110 @@ export default function Dashboard() {
 
                 {/* Footer note */}
                 <div className="mt-6 text-center">
-                    <p className="text-white/15 text-[10px] font-Raleway tracking-wider">
+                    <p className={`text-[10px] font-Raleway tracking-wider ${isDarkMode ? "text-white/15" : "text-slate-400"}`}>
                         Data sourced in real-time via Firebase &middot; AD8232 &middot;
                         MAX30100 &middot; BMP-280
                     </p>
-                    <h1 className='text-[15px] mt-3 font-Raleway text-[#ECE5E5] text-center'>Made with ❤️ Disha, Aanya, Priyansh</h1>
+                    <h1 className={`text-[15px] mt-3 font-Raleway text-center ${isDarkMode ? "text-[#ECE5E5]" : "text-slate-600"}`}>Made with ❤️ Disha, Aanya, Priyansh</h1>
                 </div>
             </div>
 
-            {/* ── Global Animations ── */}
+            {/* ── Floating Chat Widget ── */}
+            <div className="fixed bottom-6 right-6 z-50">
+                {isChatOpen ? (
+                    <div className={`w-[350px] h-[500px] border rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-300 transition-colors ${isDarkMode ? "bg-[#021620] border-white/10" : "bg-white border-slate-200"
+                        }`}>
+                        {/* Chat Header */}
+                        <div className={`p-4 border-b flex items-center justify-between ${isDarkMode ? "bg-gradient-to-r from-[#2ee8a0]/20 to-[#0f7eee]/20 border-white/10" : "bg-slate-50 border-slate-100"
+                            }`}>
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-[#2ee8a0] animate-pulse" />
+                                <span className={`text-sm font-bold font-Raleway ${isDarkMode ? "text-white" : "text-slate-800"}`}>VitalGuard AI</span>
+                            </div>
+                            <button onClick={() => setIsChatOpen(false)} className={`${isDarkMode ? "text-white/40 hover:text-white" : "text-slate-400 hover:text-slate-600"} transition-colors`}>
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+
+                        {/* Messages Box */}
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-transparent">
+                            {messages.map((msg, i) => (
+                                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                    <div className={`max-w-[85%] p-3 rounded-2xl text-xs font-Raleway leading-relaxed ${msg.role === 'user'
+                                        ? 'bg-[#0f7eee] text-white rounded-tr-none'
+                                        : isDarkMode
+                                            ? 'bg-white/5 text-white/90 border border-white/10 rounded-tl-none'
+                                            : 'bg-slate-100 text-slate-700 border border-slate-200 rounded-tl-none'
+                                        }`}>
+                                        {msg.text}
+                                    </div>
+                                </div>
+                            ))}
+                            {isTyping && (
+                                <div className="flex justify-start">
+                                    <div className={`p-3 rounded-2xl rounded-tl-none flex gap-1 border ${isDarkMode ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200"
+                                        }`}>
+                                        <div className={`w-1 h-1 rounded-full animate-bounce ${isDarkMode ? "bg-white/40" : "bg-slate-400"}`} />
+                                        <div className={`w-1 h-1 rounded-full animate-bounce [animation-delay:0.2s] ${isDarkMode ? "bg-white/40" : "bg-slate-400"}`} />
+                                        <div className={`w-1 h-1 rounded-full animate-bounce [animation-delay:0.4s] ${isDarkMode ? "bg-white/40" : "bg-slate-400"}`} />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Chat Input */}
+                        <div className={`p-4 border-t ${isDarkMode ? "bg-white/[0.02] border-white/10" : "bg-slate-50 border-slate-100"
+                            }`}>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={chatInput}
+                                    onChange={(e) => setChatInput(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                                    placeholder="Ask about your health..."
+                                    className={`flex-1 border rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-[#2ee8a0]/50 transition-colors font-Raleway ${isDarkMode ? "bg-white/5 border-white/10 text-white" : "bg-white border-slate-200 text-slate-800"
+                                        }`}
+                                />
+                                <button
+                                    onClick={handleSendMessage}
+                                    disabled={!chatInput.trim() || isTyping}
+                                    className="p-2 bg-[#2ee8a0] hover:bg-[#26c085] disabled:opacity-50 disabled:hover:bg-[#2ee8a0] text-[#022633] rounded-xl transition-all duration-300"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <button
+                        onClick={() => setIsChatOpen(true)}
+                        className={`w-14 h-14 bg-gradient-to-br from-[#2ee8a0] to-[#0f7eee] rounded-full shadow-lg flex items-center justify-center text-[#022633] hover:scale-110 transition-all duration-300 group ${!isDarkMode && "shadow-slate-200"
+                            }`}
+                    >
+                        <svg className="w-6 h-6 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        </svg>
+                        {/* Notification badge */}
+                        <div className={`absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 flex items-center justify-center ${isDarkMode ? "border-[#010b10]" : "border-white"
+                            }`}>
+                            <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
+                        </div>
+                    </button>
+                )}
+            </div>
+
+            {/* ── Global Animations & Scrollbar ── */}
             <style>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 10px;
+        }
         @keyframes heartBeat {
           0%   { transform: scale(1); }
           14%  { transform: scale(1.25); }

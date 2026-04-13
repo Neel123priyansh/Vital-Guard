@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../src/assets/logo.png";
+import FloatingLines from "../src/assets/background";
 
 export default function Login() {
     const navigate = useNavigate();
@@ -48,20 +49,7 @@ export default function Login() {
         <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-[#022633]">
             {/* Animated background elements */}
             <div className="absolute inset-0 overflow-hidden">
-                <div
-                    className="absolute -top-1/4 -left-1/4 w-[600px] h-[600px] rounded-full opacity-[0.07]"
-                    style={{
-                        background: "radial-gradient(circle, #2ee8a0 0%, transparent 70%)",
-                        animation: "floatOrb 8s ease-in-out infinite",
-                    }}
-                />
-                <div
-                    className="absolute -bottom-1/4 -right-1/4 w-[500px] h-[500px] rounded-full opacity-[0.05]"
-                    style={{
-                        background: "radial-gradient(circle, #0f7eee 0%, transparent 70%)",
-                        animation: "floatOrb 10s ease-in-out infinite reverse",
-                    }}
-                />
+                <FloatingLines />
                 <div
                     className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-[0.03]"
                     style={{
@@ -70,21 +58,13 @@ export default function Login() {
                     }}
                 />
                 {/* Grid pattern overlay */}
-                <div
-                    className="absolute inset-0 opacity-[0.03]"
-                    style={{
-                        backgroundImage:
-                            "linear-gradient(rgba(46,232,160,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(46,232,160,0.3) 1px, transparent 1px)",
-                        backgroundSize: "60px 60px",
-                    }}
-                />
             </div>
 
             {/* Card */}
             <div
                 className={`relative z-10 w-full max-w-[440px] mx-4 transition-all duration-700 ease-out ${mounted
-                        ? "opacity-100 translate-y-0 scale-100"
-                        : "opacity-0 translate-y-8 scale-95"
+                    ? "opacity-100 translate-y-0 scale-100"
+                    : "opacity-0 translate-y-8 scale-95"
                     }`}
             >
                 <div className="backdrop-blur-xl bg-white/[0.04] border border-white/[0.08] rounded-3xl p-8 md:p-10 shadow-2xl">
@@ -100,9 +80,6 @@ export default function Login() {
                                 <h1 className="text-xl font-bold text-white leading-tight">
                                     VitalGuard.
                                 </h1>
-                                <p className="text-[9px] text-[#2ee8a0] font-Raleway">
-                                    by Raphson Robotics
-                                </p>
                             </div>
                         </Link>
                         <h2 className="text-2xl font-bold text-white font-Raleway tracking-tight">

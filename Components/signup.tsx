@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import logo from "../src/assets/logo.png";
+import FloatingLines from "../src/assets/background";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -84,45 +85,16 @@ export default function Signup() {
     <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-[#022633]">
       {/* Animated background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div
-          className="absolute -top-1/3 -right-1/4 w-[600px] h-[600px] rounded-full opacity-[0.07]"
-          style={{
-            background: "radial-gradient(circle, #0f7eee 0%, transparent 70%)",
-            animation: "floatOrb 9s ease-in-out infinite",
-          }}
-        />
-        <div
-          className="absolute -bottom-1/4 -left-1/4 w-[500px] h-[500px] rounded-full opacity-[0.06]"
-          style={{
-            background: "radial-gradient(circle, #2ee8a0 0%, transparent 70%)",
-            animation: "floatOrb 11s ease-in-out infinite reverse",
-          }}
-        />
-        <div
-          className="absolute top-1/3 right-1/3 w-[300px] h-[300px] rounded-full opacity-[0.04]"
-          style={{
-            background: "radial-gradient(circle, #2ee8a0 0%, transparent 60%)",
-            animation: "pulse 7s ease-in-out infinite",
-          }}
-        />
+        <FloatingLines />
         {/* Grid pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(46,232,160,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(46,232,160,0.3) 1px, transparent 1px)",
-            backgroundSize: "60px 60px",
-          }}
-        />
       </div>
 
       {/* Card */}
       <div
-        className={`relative z-10 w-full max-w-[440px] mx-4 my-8 transition-all duration-700 ease-out ${
-          mounted
-            ? "opacity-100 translate-y-0 scale-100"
-            : "opacity-0 translate-y-8 scale-95"
-        }`}
+        className={`relative z-10 w-full max-w-[440px] mx-4 my-8 transition-all duration-700 ease-out ${mounted
+          ? "opacity-100 translate-y-0 scale-100"
+          : "opacity-0 translate-y-8 scale-95"
+          }`}
       >
         <div className="backdrop-blur-xl bg-white/[0.04] border border-white/[0.08] rounded-3xl p-8 md:p-10 shadow-2xl">
           {/* Logo & heading */}
@@ -364,13 +336,12 @@ export default function Signup() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-enter password"
-                  className={`w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.05] border text-white placeholder-white/20 text-sm font-Raleway outline-none focus:bg-white/[0.07] focus:ring-1 transition-all duration-200 ${
-                    confirmPassword.length > 0 && confirmPassword !== password
-                      ? "border-red-500/40 focus:border-red-500/50 focus:ring-red-500/20"
-                      : confirmPassword.length > 0 && confirmPassword === password
+                  className={`w-full pl-11 pr-4 py-3 rounded-xl bg-white/[0.05] border text-white placeholder-white/20 text-sm font-Raleway outline-none focus:bg-white/[0.07] focus:ring-1 transition-all duration-200 ${confirmPassword.length > 0 && confirmPassword !== password
+                    ? "border-red-500/40 focus:border-red-500/50 focus:ring-red-500/20"
+                    : confirmPassword.length > 0 && confirmPassword === password
                       ? "border-[#2ee8a0]/40 focus:border-[#2ee8a0]/50 focus:ring-[#2ee8a0]/20"
                       : "border-white/[0.08] focus:border-[#2ee8a0]/50 focus:ring-[#2ee8a0]/20"
-                  }`}
+                    }`}
                 />
                 {confirmPassword.length > 0 && confirmPassword === password && (
                   <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#2ee8a0]">
@@ -406,9 +377,8 @@ export default function Signup() {
               }}
             >
               <span
-                className={`inline-flex items-center gap-2 transition-all duration-200 ${
-                  loading ? "opacity-0" : "opacity-100"
-                }`}
+                className={`inline-flex items-center gap-2 transition-all duration-200 ${loading ? "opacity-0" : "opacity-100"
+                  }`}
               >
                 Create Account
                 <svg
