@@ -35,7 +35,7 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      const res = await fetch("https://alumni-expenses-findlaw-supervision.trycloudflare.com/api/signup", {
+      const res = await fetch("https://legacy-democratic-relax-carmen.trycloudflare.com/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
