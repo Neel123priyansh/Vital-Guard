@@ -1,7 +1,4 @@
-// ──────────────────────────────────────────────────────────────────────────────
-//  Firebase Configuration — VitalGuard
-//  Replace the placeholder values below with your actual Firebase project config
-// ──────────────────────────────────────────────────────────────────────────────
+
 import { initializeApp } from "firebase/app";
 import { getDatabase } from "firebase/database";
 

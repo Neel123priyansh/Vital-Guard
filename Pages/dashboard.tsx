@@ -5,14 +5,11 @@ import { ref, onValue } from "firebase/database";
 import logo from "../src/assets/logo.png";
 import axios from "axios";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 interface UserData {
     id: string;
     name: string;
     email: string;
 }
-
-// ─── ECG Canvas Component ─────────────────────────────────────────────────────
 function ECGGraph({ ecgData }: { ecgData: number[] }) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -152,13 +149,11 @@ function ECGGraph({ ecgData }: { ecgData: number[] }) {
     );
 }
 
-// ─── Heart Beat Animation ─────────────────────────────────────────────────────
 function HeartBeat({ bpm }: { bpm: number }) {
     const duration = bpm > 0 ? 60 / bpm : 1;
 
     return (
         <div className="relative flex items-center justify-center">
-            {/* Outer pulse rings */}
             <div
                 className="absolute w-24 h-24 rounded-full"
                 style={{
@@ -286,9 +281,6 @@ function StatusDot({ connected }: { connected: boolean }) {
     );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-//  DASHBOARD
-// ═══════════════════════════════════════════════════════════════════════════════
 export default function Dashboard() {
     const navigate = useNavigate();
     const [user, setUser] = useState<UserData | null>(null);
