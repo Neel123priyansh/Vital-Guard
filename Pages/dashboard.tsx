@@ -406,7 +406,7 @@ export default function Dashboard() {
         setIsTyping(true);
 
         try {
-            const response = await axios.post('http://localhost:8000/api/chat', {
+            const response = await axios.post('https://vitalguard-llm.onrender.com/api/chat', {
                 message: userMsg,
                 vitals: { bpm, temperature, spo2, history: vitalsHistory }
             });
