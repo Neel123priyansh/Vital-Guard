@@ -1,73 +1,165 @@
-# React + TypeScript + Vite
+# 📌 Vital Guard, A Portable Smart Health & Heart Monitoring System with Personal suggestions 
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A **portable IoT-based health monitoring system** that tracks vital parameters in real-time and provides intelligent health insights, medical test recommendations, and yoga-based recovery suggestions.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 📖 Project Overview
 
-## React Compiler
+This project is developed as part of **Software Engineering and Project Management (21CSC303J)** at SRM Institute of Science and Technology. 
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+The system combines **embedded hardware, mobile application, and analytics engine** to deliver a complete personal healthcare solution.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🚀 Features
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+* 📊 Real-time monitoring of:
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+  * ECG (Electrocardiogram)
+  * Heart Rate (BPM)
+  * Blood Glucose Level
+  * Body Temperature
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+* 🧠 Intelligent Health Analysis
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+  * Classifies vitals as *Normal / Borderline / Abnormal*
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+* 🏥 Medical Test Recommendations
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+  * Suggests diagnostic tests (e.g., HbA1c, ECG)
+
+* 🧘 Yoga-Based Recovery Suggestions
+
+  * Personalized yoga poses for natural improvement
+
+* 📱 Mobile Application
+
+  * Real-time dashboard
+  * Historical data tracking
+  * Alerts & notifications
+
+* ☁️ Cloud Integration
+
+  * Firebase-based storage
+  * Multi-device access
+
+---
+
+## 🏗️ System Architecture
+
+The system follows a **3-tier architecture**:
+
+1. **Hardware Layer**
+
+   * ESP32 Microcontroller
+   * ECG, BPM, Glucose, Temperature sensors
+
+2. **Communication Layer**
+
+   * BLE / Wi-Fi data transmission
+
+3. **Application Layer**
+
+   * Flutter Mobile App
+   * Backend Analytics Engine
+
+---
+
+## 🛠️ Tech Stack
+
+### Hardware
+
+* ESP32 / Arduino
+* AD8232 (ECG Sensor)
+* MAX30102 (Heart Rate Sensor)
+* MLX90614 (Temperature Sensor)
+* Glucose Sensor
+
+### Software
+
+* **Frontend:** Flutter (Dart)
+* **Backend:** Python (Flask) / Node.js
+* **Database:** Firebase / SQLite
+* **Firmware:** Arduino C/C++
+
+---
+
+## ⚙️ Functional Requirements
+
+* Continuous vital monitoring
+* Health status analysis
+* Medical test recommendations
+* Yoga posture suggestions
+* Real-time data transmission
+* Alerts for abnormal conditions
+* Historical data tracking
+
+---
+
+## 🔒 Non-Functional Requirements
+
+* High accuracy (medical-grade tolerance)
+* Real-time performance
+* Secure data transmission (encryption)
+* User-friendly interface
+* Reliable system operation
+
+---
+
+## 👥 Team Members
+
+* Disha Singhal
+* Priyansh Neel
+* Aanya
+
+---
+
+## 📅 Development Methodology
+
+* Agile Model (Iterative & Incremental)
+* Sprint-based development:
+
+  * Phase 1: Basic prototype (BPM + Temperature)
+  * Phase 2: Full integration (ECG + Glucose + Analytics)
+  * Phase 3: Optimization + Cloud + Alerts
+
+---
+
+## 🧪 Testing
+
+* Unit Testing (Sensors & modules)
+* Integration Testing (End-to-end system)
+* System Testing (Full workflow)
+* Manual Testing (Real-world scenarios)
+
+✔️ All major modules passed test cases successfully. 
+
+---
+
+## 🌟 Future Enhancements
+
+* AI-based predictive health analysis
+* Integration with hospitals
+* Wearable smartwatch version
+* Advanced ECG interpretation
+
+---
+
+## 📜 License
+
+This project is developed for **academic purposes**.
+
+---
+
+## 🙌 Acknowledgment
+
+Developed as part of **SEPM Lab** at SRM Institute of Science and Technology.
+
+---
+
+If you want, I can:
+
+* Make this **shorter (1-page README)**
+* Add **badges (GitHub style)**
+* Or customize it for your **actual code repo (with setup + install steps)**
