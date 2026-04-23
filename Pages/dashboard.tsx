@@ -397,7 +397,7 @@ export default function Dashboard() {
     }, [bpm, temperature, spo2]);
 
     // ── Chat Logic ──
-    const handleSendMessage = async () => {
+    const handleSendMessage = async () => { 
         if (!chatInput.trim()) return;
  
         const userMsg = chatInput;
