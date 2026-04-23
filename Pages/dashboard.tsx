@@ -401,7 +401,7 @@ export default function Dashboard() {
         if (!chatInput.trim()) return;
  
         const userMsg = chatInput;
-        setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
+        setMessages(prev => [...prev, { role: 'user', text: userMsg }]); 
         setChatInput('');
         setIsTyping(true);
 
