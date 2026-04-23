@@ -399,7 +399,7 @@ export default function Dashboard() {
     // ── Chat Logic ──
     const handleSendMessage = async () => {
         if (!chatInput.trim()) return;
-
+ 
         const userMsg = chatInput;
         setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
         setChatInput('');
