@@ -380,7 +380,7 @@ export default function Dashboard() {
             unsubBpm();
             unsubTemp();
             unsubPress();
-            unsubAlt();
+            unsubAlt(); 
             unsubSpo2();
         };
     }, []);
