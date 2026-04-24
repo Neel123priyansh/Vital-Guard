@@ -157,9 +157,3 @@ This project is developed for **academic purposes**.
 Developed as part of **SEPM Lab** at SRM Institute of Science and Technology.
 
 ---
-
-If you want, I can:
-
-* Make this **shorter (1-page README)**
-* Add **badges (GitHub style)**
-* Or customize it for your **actual code repo (with setup + install steps)**
