@@ -6,7 +6,7 @@ A **portable IoT-based health monitoring system** that tracks vital parameters i
 
 ## 📖 Project Overview
 
-This project is developed as part of **Software Engineering and Project Management (21CSC303J)** at SRM Institute of Science and Technology. 
+This project is developed as part of **Software Engineering and Project Management** at SRM Institute of Science and Technology. 
 
 The system combines **embedded hardware, mobile application, and analytics engine** to deliver a complete personal healthcare solution.
 
