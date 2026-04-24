@@ -53,7 +53,7 @@ The system follows a **3-tier architecture**:
 1. **Hardware Layer**
 
    * ESP32 Microcontroller
-   * ECG, BPM, Glucose, Temperature sensors
+   * ECG-AD8232, BPM-MAX30100, Temperature sensors-BMP280, Altitude Meter - BMP280, SpO2 - MAX30100
 
 2. **Communication Layer**
 
@@ -70,18 +70,17 @@ The system follows a **3-tier architecture**:
 
 ### Hardware
 
-* ESP32 / Arduino
+* ESP32
 * AD8232 (ECG Sensor)
 * MAX30102 (Heart Rate Sensor)
-* MLX90614 (Temperature Sensor)
-* Glucose Sensor
+* BMP280 (Temperature Sensor)
 
 ### Software
 
-* **Frontend:** Flutter (Dart)
-* **Backend:** Python (Flask) / Node.js
-* **Database:** Firebase / SQLite
-* **Firmware:** Arduino C/C++
+* **Frontend:** React, Tailwindcss
+* **Backend:**  Node.js
+* **Database:** Firebase
+* **Firmware:** Arduino C
 
 ---
 
