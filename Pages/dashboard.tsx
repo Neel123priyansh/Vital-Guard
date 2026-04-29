@@ -392,7 +392,7 @@ export default function Dashboard() {
                 const newEntry = { bpm, temperature, spo2, time: new Date().toLocaleTimeString() };
                 const updated = [newEntry, ...prev].slice(0, 5); // Keep latest 5
                 return updated;
-            });
+            }); 
         }
     }, [bpm, temperature, spo2]);
 
