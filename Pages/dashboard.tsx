@@ -384,7 +384,7 @@ export default function Dashboard() {
             unsubSpo2();
         };
     }, []);
-
+ 
     // ── Update History ──
     useEffect(() => {
         if (bpm > 0 || temperature > 0 || spo2 > 0) {
