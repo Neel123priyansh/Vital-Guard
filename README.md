@@ -6,7 +6,7 @@ A **portable IoT-based health monitoring system** that tracks vital parameters i
 
 ## 📖 Project Overview
 
-This project is developed as part of **Software Engineering and Project Management (21CSC303J)** at SRM Institute of Science and Technology. 
+This project is developed as part of **Software Engineering and Project Management** at SRM Institute of Science and Technology. 
 
 The system combines **embedded hardware, mobile application, and analytics engine** to deliver a complete personal healthcare solution.
 
@@ -53,7 +53,7 @@ The system follows a **3-tier architecture**:
 1. **Hardware Layer**
 
    * ESP32 Microcontroller
-   * ECG, BPM, Glucose, Temperature sensors
+   * ECG-AD8232, BPM-MAX30100, Temperature sensors-BMP280, Altitude Meter - BMP280, SpO2 - MAX30100
 
 2. **Communication Layer**
 
@@ -70,18 +70,17 @@ The system follows a **3-tier architecture**:
 
 ### Hardware
 
-* ESP32 / Arduino
+* ESP32
 * AD8232 (ECG Sensor)
 * MAX30102 (Heart Rate Sensor)
-* MLX90614 (Temperature Sensor)
-* Glucose Sensor
+* BMP280 (Temperature Sensor)
 
 ### Software
 
-* **Frontend:** Flutter (Dart)
-* **Backend:** Python (Flask) / Node.js
-* **Database:** Firebase / SQLite
-* **Firmware:** Arduino C/C++
+* **Frontend:** React, Tailwindcss
+* **Backend:**  Node.js
+* **Database:** Firebase
+* **Firmware:** Arduino C
 
 ---
 
@@ -157,9 +156,3 @@ This project is developed for **academic purposes**.
 Developed as part of **SEPM Lab** at SRM Institute of Science and Technology.
 
 ---
-
-If you want, I can:
-
-* Make this **shorter (1-page README)**
-* Add **badges (GitHub style)**
-* Or customize it for your **actual code repo (with setup + install steps)**
