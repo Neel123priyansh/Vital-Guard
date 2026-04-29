@@ -305,6 +305,12 @@ export default function Dashboard() {
     const [isTyping, setIsTyping] = useState(false);
     const [vitalsHistory, setVitalsHistory] = useState<any[]>([]);
 
+    // Health Reports State
+    const [uploadedReports, setUploadedReports] = useState<{ name: string; file: File; uploadedAt: string }[]>([]);
+    const [healthTips, setHealthTips] = useState<string[]>([]);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     const MAX_ECG_POINTS = 300;
 
     // ── Auth check ──
@@ -420,6 +426,62 @@ export default function Dashboard() {
         }
     };
 
+    // ── Health Reports Logic ──
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (files) {
+            Array.from(files).forEach((file) => {
+                if (file.type === "application/pdf") {
+                    setUploadedReports(prev => [...prev, {
+                        name: file.name,
+                        file: file,
+                        uploadedAt: new Date().toLocaleDateString()
+                    }]);
+                } else {
+                    alert("Please upload PDF files only");
+                }
+            });
+        }
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const handleAnalyzeReports = async () => {
+        if (uploadedReports.length === 0) {
+            alert("Please upload at least one health report");
+            return;
+        }
+
+        setIsAnalyzing(true);
+        try {
+            // Create FormData for file upload
+            const formData = new FormData();
+            uploadedReports.forEach((report) => {
+                formData.append("files", report.file);
+            });
+
+            const response = await axios.post(
+                'https://vitalguard-llm.onrender.com/api/analyze-reports',
+                formData,
+                {
+                    headers: { "Content-Type": "multipart/form-data" }
+                }
+            );
+
+            if (response.data.tips) {
+                setHealthTips(Array.isArray(response.data.tips) ? response.data.tips : [response.data.tips]);
+            }
+        } catch (error) {
+            console.error("Report analysis error:", error);
+            setHealthTips(["Unable to analyze reports. Please check if the LLM server is running."]);
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+
+    const removeReport = (index: number) => {
+        setUploadedReports(prev => prev.filter((_, i) => i !== index));
+    };
+
     // ── Logout ──
     const handleLogout = () => {
         localStorage.removeItem("vg_token");
@@ -465,8 +527,7 @@ export default function Dashboard() {
                 : { text: "Waiting…", color: "#64748b" };
 
     return (
-        <div className={`min-h-screen w-full transition-colors duration-500 relative overflow-hidden ${isDarkMode ? "bg-[#010b10] text-white" : "bg-[#f8fafc] text-slate-900"
-            }`}>
+        <div className={`min-h-screen w-full transition-colors duration-500 relative overflow-hidden ${isDarkMode ? "bg-[#010b10] text-white" : "bg-[#f8fafc] text-slate-900"}`}>
             {/* ── Background ── */}
             <div className="absolute inset-0 pointer-events-none">
                 <div
@@ -889,6 +950,196 @@ export default function Dashboard() {
                     </MetricCard>
                 </div>
 
+                {/* ════════════════════════════════════════════════════════════════════
+            HEALTH REPORTS SECTION
+        ════════════════════════════════════════════════════════════════════ */}
+                <div className="mt-8 mb-6">
+                    <div className="mb-4">
+                        <p className={`text-[10px] font-Raleway font-bold tracking-[0.2em] uppercase ${isDarkMode ? "text-white/30" : "text-slate-400"}`}>
+                            Health Intelligence
+                        </p>
+                        <h2 className={`text-2xl md:text-3xl font-bold font-Raleway tracking-tight ${isDarkMode ? "text-white" : "text-slate-800"}`}>
+                            AI Health Insights
+                        </h2>
+                    </div>
+
+                    {/* Upload & Analysis Section */}
+                    <div className={`backdrop-blur-xl border rounded-2xl overflow-hidden transition-all duration-500 ${isDarkMode
+                        ? "bg-white/[0.03] border-white/[0.07] hover:bg-white/[0.05]"
+                        : "bg-white border-slate-200 shadow-sm"
+                        }`}>
+                        <div className={`p-6 border-b ${isDarkMode ? "border-white/[0.05]" : "border-slate-100"}`}>
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "#2ee8a015" }}>
+                                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#2ee8a0" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 className={`text-base font-bold font-Raleway ${isDarkMode ? "text-white" : "text-slate-800"}`}>
+                                        Upload Health Reports
+                                    </h3>
+                                    <p className={`text-xs font-Raleway ${isDarkMode ? "text-white/40" : "text-slate-500"}`}>
+                                        PDF reports from your medical tests
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* File Upload Area */}
+                            <div className="mb-4">
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    multiple
+                                    accept=".pdf"
+                                    onChange={handleFileUpload}
+                                    className="hidden"
+                                    id="pdf-upload"
+                                />
+                                <label
+                                    htmlFor="pdf-upload"
+                                    className={`block cursor-pointer p-6 border-2 border-dashed rounded-xl transition-all duration-300 text-center ${isDarkMode
+                                        ? "border-white/[0.1] hover:border-[#2ee8a0]/50 hover:bg-white/[0.02]"
+                                        : "border-slate-300 hover:border-slate-400 hover:bg-slate-50"
+                                        }`}
+                                >
+                                    <div className="flex flex-col items-center gap-2">
+                                        <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="#2ee8a0" strokeWidth={1.5} opacity={0.6}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        <div>
+                                            <p className={`text-sm font-semibold font-Raleway ${isDarkMode ? "text-white/80" : "text-slate-700"}`}>
+                                                Click to upload or drag and drop
+                                            </p>
+                                            <p className={`text-xs font-Raleway ${isDarkMode ? "text-white/30" : "text-slate-500"}`}>
+                                                PDF files only
+                                            </p>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            {/* Uploaded Files List */}
+                            {uploadedReports.length > 0 && (
+                                <div className="mb-4">
+                                    <p className={`text-xs font-Raleway font-semibold uppercase tracking-widest mb-2 ${isDarkMode ? "text-white/40" : "text-slate-500"}`}>
+                                        Uploaded Files
+                                    </p>
+                                    <div className="space-y-2">
+                                        {uploadedReports.map((report, idx) => (
+                                            <div
+                                                key={idx}
+                                                className={`flex items-center justify-between p-3 rounded-lg transition-all duration-300 ${isDarkMode
+                                                    ? "bg-white/[0.03] border border-white/[0.05]"
+                                                    : "bg-slate-50 border border-slate-200"
+                                                    }`}
+                                            >
+                                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                    <div className="flex-shrink-0">
+                                                        <svg className="w-5 h-5 text-red-500" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
+                                        </svg>
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <p className={`text-xs font-semibold font-Raleway truncate ${isDarkMode ? "text-white/80" : "text-slate-700"}`}>
+                                            {report.name}
+                                        </p>
+                                        <p className={`text-[10px] font-Raleway ${isDarkMode ? "text-white/30" : "text-slate-500"}`}>
+                                            {report.uploadedAt}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => removeReport(idx)}
+                                    className={`flex-shrink-0 ml-2 p-1.5 rounded-lg transition-all duration-300 ${isDarkMode
+                                        ? "hover:bg-red-500/10 text-red-400/60 hover:text-red-400"
+                                        : "hover:bg-red-50 text-red-500/60 hover:text-red-600"
+                                        }`}
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            ))}
+                        </div>
+                    </div>
+                    )}
+
+                        {/* Analyze Button */}
+                        <div className={`p-4 ${isDarkMode ? "bg-white/[0.01]" : "bg-slate-50"}`}>
+                            <button
+                                onClick={handleAnalyzeReports}
+                                disabled={uploadedReports.length === 0 || isAnalyzing}
+                                className={`w-full py-3 rounded-xl font-Raleway font-semibold text-sm transition-all duration-300 flex items-center justify-center gap-2 ${uploadedReports.length === 0 || isAnalyzing
+                                    ? isDarkMode
+                                        ? "bg-white/[0.03] text-white/30 cursor-not-allowed"
+                                        : "bg-slate-100 text-slate-400 cursor-not-allowed"
+                                    : isDarkMode
+                                        ? "bg-gradient-to-r from-[#2ee8a0] to-[#0f7eee] text-slate-900 hover:shadow-lg hover:shadow-[#2ee8a0]/20"
+                                        : "bg-gradient-to-r from-[#2ee8a0] to-[#0f7eee] text-white hover:shadow-lg"
+                                    }`}
+                            >
+                                {isAnalyzing ? (
+                                    <>
+                                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                        </svg>
+                                        Analyzing Reports...
+                                    </>
+                                ) : (
+                                    <>
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        </svg>
+                                        Get Health Tips
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                    {healthTips.length > 0 && (
+                        <div className="mt-6">
+                            <div className="mb-4">
+                                <h3 className={`text-lg font-bold font-Raleway ${isDarkMode ? "text-white" : "text-slate-800"}`}>
+                                    Personalized Health Tips
+                                </h3>
+                                <p className={`text-xs font-Raleway ${isDarkMode ? "text-white/40" : "text-slate-500"}`}>
+                                    Based on your uploaded reports and current vitals
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {healthTips.map((tip, idx) => (
+                                    <div
+                                        key={idx}
+                                        className={`backdrop-blur-xl border rounded-2xl p-4 transition-all duration-500 ${isDarkMode
+                                            ? "bg-white/[0.03] border-white/[0.07] hover:bg-white/[0.05] hover:border-white/[0.12]"
+                                            : "bg-white border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-md"
+                                            }`}
+                                    >
+                                        <div className="flex gap-3">
+                                            <div className="flex-shrink-0 pt-0.5">
+                                                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: "#2ee8a015" }}>
+                                                    <svg className="w-4 h-4 text-[#2ee8a0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className={`text-sm leading-relaxed font-Raleway ${isDarkMode ? "text-white/80" : "text-slate-700"}`}>
+                                                    {tip}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
                 {/* Footer note */}
                 <div className="mt-6 text-center">
                     <p className={`text-[10px] font-Raleway tracking-wider ${isDarkMode ? "text-white/15" : "text-slate-400"}`}>
@@ -898,6 +1149,37 @@ export default function Dashboard() {
                     <h1 className={`text-[15px] mt-3 font-Raleway text-center ${isDarkMode ? "text-[#ECE5E5]" : "text-slate-600"}`}>Made with ❤️ Disha, Aanya, Priyansh</h1>
                 </div>
             </div>
+
+            {/* ── Global Animations & Scrollbar ── */}
+            <style>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 10px;
+        }
+        @keyframes heartBeat {
+          0%   { transform: scale(1); }
+          14%  { transform: scale(1.25); }
+          28%  { transform: scale(1); }
+          42%  { transform: scale(1.15); }
+          56%  { transform: scale(1); }
+          100% { transform: scale(1); }
+        }
+        @keyframes heartPulseRing {
+          0%   { transform: scale(0.8); opacity: 0.4; }
+          50%  { transform: scale(1.4); opacity: 0; }
+          100% { transform: scale(0.8); opacity: 0; }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 0.1; transform: scale(1); }
+          50%      { opacity: 0.3; transform: scale(1.2); }
+        }
+      `}</style>
 
             {/* ── Floating Chat Widget ── */}
             <div className="fixed bottom-6 right-6 z-50">
@@ -982,37 +1264,5 @@ export default function Dashboard() {
                     </button>
                 )}
             </div>
-
-            {/* ── Global Animations & Scrollbar ── */}
-            <style>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 10px;
-        }
-        @keyframes heartBeat {
-          0%   { transform: scale(1); }
-          14%  { transform: scale(1.25); }
-          28%  { transform: scale(1); }
-          42%  { transform: scale(1.15); }
-          56%  { transform: scale(1); }
-          100% { transform: scale(1); }
-        }
-        @keyframes heartPulseRing {
-          0%   { transform: scale(0.8); opacity: 0.4; }
-          50%  { transform: scale(1.4); opacity: 0; }
-          100% { transform: scale(0.8); opacity: 0; }
-        }
-        @keyframes pulse {
-          0%, 100% { opacity: 0.1; transform: scale(1); }
-          50%      { opacity: 0.3; transform: scale(1.2); }
-        }
-      `}</style>
         </div>
-    );
-}
+    )}
