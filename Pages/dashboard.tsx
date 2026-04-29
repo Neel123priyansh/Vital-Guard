@@ -387,7 +387,7 @@ export default function Dashboard() {
  
     // ── Update History ──
     useEffect(() => {
-        if (bpm > 0 || temperature > 0 || spo2 > 0) {
+        if (bpm > 0 || temperature > 0 || spo2 > 0) { 
             setVitalsHistory(prev => {
                 const newEntry = { bpm, temperature, spo2, time: new Date().toLocaleTimeString() };
                 const updated = [newEntry, ...prev].slice(0, 5); // Keep latest 5
