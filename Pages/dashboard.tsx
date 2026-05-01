@@ -332,7 +332,7 @@ export default function Dashboard() {
     // ── Firebase Realtime Listeners ──
     useEffect(() => {
         // ECG value (AD8232 pushes individual readings)
-        const ecgRef = ref(db, "healthData/ecg");
+        const ecgRef = ref(db, "healthData/59/ecg");
         const unsubEcg = onValue(ecgRef, (snapshot) => {
             const val = snapshot.val();
             if (val !== null && val !== undefined) {
@@ -347,35 +347,35 @@ export default function Dashboard() {
         });
 
         // BPM (MAX30100)
-        const bpmRef = ref(db, "healthData/heartRate");
+        const bpmRef = ref(db, "healthData/59/hr");
         const unsubBpm = onValue(bpmRef, (snapshot) => {
             const val = snapshot.val();
             if (val !== null) setBpm(Number(val));
         });
 
         // Temperature
-        const tempRef = ref(db, "healthData/temperature");
+        const tempRef = ref(db, "healthData/59/temp");
         const unsubTemp = onValue(tempRef, (snapshot) => {
             const val = snapshot.val();
             if (val !== null) setTemperature(Number(val));
         });
 
         // Pressure (BMP-280)
-        const pressRef = ref(db, "healthData/pressure");
+        const pressRef = ref(db, "healthData/59/pressure");
         const unsubPress = onValue(pressRef, (snapshot) => {
             const val = snapshot.val();
             if (val !== null) setPressure(Number(val));
         });
 
         // Altitude (BMP-280)
-        const altRef = ref(db, "healthData/altitude");
+        const altRef = ref(db, "healthData/59/altitude");
         const unsubAlt = onValue(altRef, (snapshot) => {
             const val = snapshot.val();
             if (val !== null) setAltitude(Number(val));
         });
 
         // SpO2 (MAX30100)
-        const spo2Ref = ref(db, "healthData/spo2");
+        const spo2Ref = ref(db, "healthData/59/spo2");
         const unsubSpo2 = onValue(spo2Ref, (snapshot) => {
             const val = snapshot.val();
             if (val !== null) setSpo2(Number(val));
@@ -1264,5 +1264,39 @@ export default function Dashboard() {
                     </button>
                 )}
             </div>
-        </div>
-    )}
+
+            {/* ── Global Animations & Scrollbar ── */}
+            <style>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 10px;
+        }
+        @keyframes heartBeat {
+          0%   { transform: scale(1); }
+          14%  { transform: scale(1.25); }
+          28%  { transform: scale(1); }
+          42%  { transform: scale(1.15); }
+          56%  { transform: scale(1); }
+          100% { transform: scale(1); }
+        }
+        @keyframes heartPulseRing {
+          0%   { transform: scale(0.8); opacity: 0.4; }
+          50%  { transform: scale(1.4); opacity: 0; }
+          100% { transform: scale(0.8); opacity: 0; }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 0.1; transform: scale(1); }
+          50%      { opacity: 0.3; transform: scale(1.2); }
+        }
+      `}</style>
+    </div>
+    </div>
+    );
+}
+
