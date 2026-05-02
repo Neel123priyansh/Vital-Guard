@@ -962,7 +962,7 @@ export default function Dashboard() {
 
                     </div>
 
-                    {/* Upload & Analysis Section */}
+
                     <div className={`backdrop-blur-xl border rounded-2xl overflow-hidden transition-all duration-500 ${isDarkMode
                         ? "bg-white/[0.03] border-white/[0.07] hover:bg-white/[0.05]"
                         : "bg-white border-slate-200 shadow-sm"
