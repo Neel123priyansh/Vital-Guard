@@ -10,6 +10,7 @@ interface UserData {
     name: string;
     email: string;
 }
+
 function ECGGraph({ ecgData }: { ecgData: number[] }) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -386,28 +387,28 @@ export default function Dashboard() {
             unsubBpm();
             unsubTemp();
             unsubPress();
-            unsubAlt(); 
+            unsubAlt();
             unsubSpo2();
         };
     }, []);
- 
+
     // ── Update History ──
     useEffect(() => {
-        if (bpm > 0 || temperature > 0 || spo2 > 0) { 
+        if (bpm > 0 || temperature > 0 || spo2 > 0) {
             setVitalsHistory(prev => {
                 const newEntry = { bpm, temperature, spo2, time: new Date().toLocaleTimeString() };
                 const updated = [newEntry, ...prev].slice(0, 5); // Keep latest 5
                 return updated;
-            }); 
+            });
         }
     }, [bpm, temperature, spo2]);
 
     // ── Chat Logic ──
-    const handleSendMessage = async () => { 
+    const handleSendMessage = async () => {
         if (!chatInput.trim()) return;
- 
+
         const userMsg = chatInput;
-        setMessages(prev => [...prev, { role: 'user', text: userMsg }]); 
+        setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
         setChatInput('');
         setIsTyping(true);
 
@@ -1037,236 +1038,121 @@ export default function Dashboard() {
                                                 <div className="flex items-center gap-3 flex-1 min-w-0">
                                                     <div className="flex-shrink-0">
                                                         <svg className="w-5 h-5 text-red-500" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
-                                        </svg>
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                        <p className={`text-xs font-semibold font-Raleway truncate ${isDarkMode ? "text-white/80" : "text-slate-700"}`}>
-                                            {report.name}
-                                        </p>
-                                        <p className={`text-[10px] font-Raleway ${isDarkMode ? "text-white/30" : "text-slate-500"}`}>
-                                            {report.uploadedAt}
-                                        </p>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => removeReport(idx)}
-                                    className={`flex-shrink-0 ml-2 p-1.5 rounded-lg transition-all duration-300 ${isDarkMode
-                                        ? "hover:bg-red-500/10 text-red-400/60 hover:text-red-400"
-                                        : "hover:bg-red-50 text-red-500/60 hover:text-red-600"
-                                        }`}
-                                >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
-                            ))}
-                        </div>
-                    </div>
-                    )}
-
-                        {/* Analyze Button */}
-                        <div className={`p-4 ${isDarkMode ? "bg-white/[0.01]" : "bg-slate-50"}`}>
-                            <button
-                                onClick={handleAnalyzeReports}
-                                disabled={uploadedReports.length === 0 || isAnalyzing}
-                                className={`w-full py-3 rounded-xl font-Raleway font-semibold text-sm transition-all duration-300 flex items-center justify-center gap-2 ${uploadedReports.length === 0 || isAnalyzing
-                                    ? isDarkMode
-                                        ? "bg-white/[0.03] text-white/30 cursor-not-allowed"
-                                        : "bg-slate-100 text-slate-400 cursor-not-allowed"
-                                    : isDarkMode
-                                        ? "bg-gradient-to-r from-[#2ee8a0] to-[#0f7eee] text-slate-900 hover:shadow-lg hover:shadow-[#2ee8a0]/20"
-                                        : "bg-gradient-to-r from-[#2ee8a0] to-[#0f7eee] text-white hover:shadow-lg"
-                                    }`}
-                            >
-                                {isAnalyzing ? (
-                                    <>
-                                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                        </svg>
-                                        Analyzing Reports...
-                                    </>
-                                ) : (
-                                    <>
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                        </svg>
-                                        Get Health Tips
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                    {healthTips.length > 0 && (
-                        <div className="mt-6">
-                            <div className="mb-4">
-                                <h3 className={`text-lg font-bold font-Raleway ${isDarkMode ? "text-white" : "text-slate-800"}`}>
-                                    Personalized Health Tips
-                                </h3>
-                                <p className={`text-xs font-Raleway ${isDarkMode ? "text-white/40" : "text-slate-500"}`}>
-                                    Based on your uploaded reports and current vitals
-                                </p>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {healthTips.map((tip, idx) => (
-                                    <div
-                                        key={idx}
-                                        className={`backdrop-blur-xl border rounded-2xl p-4 transition-all duration-500 ${isDarkMode
-                                            ? "bg-white/[0.03] border-white/[0.07] hover:bg-white/[0.05] hover:border-white/[0.12]"
-                                            : "bg-white border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-md"
-                                            }`}
-                                    >
-                                        <div className="flex gap-3">
-                                            <div className="flex-shrink-0 pt-0.5">
-                                                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: "#2ee8a015" }}>
-                                                    <svg className="w-4 h-4 text-[#2ee8a0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                    </svg>
+                                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
+                                                        </svg>
+                                                    </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className={`text-xs font-semibold font-Raleway truncate ${isDarkMode ? "text-white/80" : "text-slate-700"}`}>
+                                                            {report.name}
+                                                        </p>
+                                                        <p className={`text-[10px] font-Raleway ${isDarkMode ? "text-white/30" : "text-slate-500"}`}>
+                                                            {report.uploadedAt}
+                                                        </p>
+                                                    </div>
                                                 </div>
+                                                <button
+                                                    onClick={() => removeReport(idx)}
+                                                    className={`flex-shrink-0 ml-2 p-1.5 rounded-lg transition-all duration-300 ${isDarkMode
+                                                        ? "hover:bg-red-500/10 text-red-400/60 hover:text-red-400"
+                                                        : "hover:bg-red-50 text-red-500/60 hover:text-red-600"
+                                                        }`}
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
                                             </div>
-                                            <div className="flex-1">
-                                                <p className={`text-sm leading-relaxed font-Raleway ${isDarkMode ? "text-white/80" : "text-slate-700"}`}>
-                                                    {tip}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Footer note */}
-                <div className="mt-6 text-center">
-                    <p className={`text-[10px] font-Raleway tracking-wider ${isDarkMode ? "text-white/15" : "text-slate-400"}`}>
-                        Data sourced in real-time via Firebase &middot; AD8232 &middot;
-                        MAX30100 &middot; BMP-280
-                    </p>
-                    <h1 className={`text-[15px] mt-3 font-Raleway text-center ${isDarkMode ? "text-[#ECE5E5]" : "text-slate-600"}`}>Made with ❤️ Disha, Aanya, Priyansh</h1>
-                </div>
-            </div>
-
-            {/* ── Global Animations & Scrollbar ── */}
-            <style>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 10px;
-        }
-        @keyframes heartBeat {
-          0%   { transform: scale(1); }
-          14%  { transform: scale(1.25); }
-          28%  { transform: scale(1); }
-          42%  { transform: scale(1.15); }
-          56%  { transform: scale(1); }
-          100% { transform: scale(1); }
-        }
-        @keyframes heartPulseRing {
-          0%   { transform: scale(0.8); opacity: 0.4; }
-          50%  { transform: scale(1.4); opacity: 0; }
-          100% { transform: scale(0.8); opacity: 0; }
-        }
-        @keyframes pulse {
-          0%, 100% { opacity: 0.1; transform: scale(1); }
-          50%      { opacity: 0.3; transform: scale(1.2); }
-        }
-      `}</style>
-
-            {/* ── Floating Chat Widget ── */}
-            <div className="fixed bottom-6 right-6 z-50">
-                {isChatOpen ? (
-                    <div className={`w-[350px] h-[500px] border rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-300 transition-colors ${isDarkMode ? "bg-[#021620] border-white/10" : "bg-white border-slate-200"
-                        }`}>
-                        {/* Chat Header */}
-                        <div className={`p-4 border-b flex items-center justify-between ${isDarkMode ? "bg-gradient-to-r from-[#2ee8a0]/20 to-[#0f7eee]/20 border-white/10" : "bg-slate-50 border-slate-100"
-                            }`}>
-                            <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 rounded-full bg-[#2ee8a0] animate-pulse" />
-                                <span className={`text-sm font-bold font-Raleway ${isDarkMode ? "text-white" : "text-slate-800"}`}>VitalGuard AI</span>
-                            </div>
-                            <button onClick={() => setIsChatOpen(false)} className={`${isDarkMode ? "text-white/40 hover:text-white" : "text-slate-400 hover:text-slate-600"} transition-colors`}>
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                            </button>
-                        </div>
-
-                        {/* Messages Box */}
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-transparent">
-                            {messages.map((msg, i) => (
-                                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`max-w-[85%] p-3 rounded-2xl text-xs font-Raleway leading-relaxed ${msg.role === 'user'
-                                        ? 'bg-[#0f7eee] text-white rounded-tr-none'
-                                        : isDarkMode
-                                            ? 'bg-white/5 text-white/90 border border-white/10 rounded-tl-none'
-                                            : 'bg-slate-100 text-slate-700 border border-slate-200 rounded-tl-none'
-                                        }`}>
-                                        {msg.text}
-                                    </div>
-                                </div>
-                            ))}
-                            {isTyping && (
-                                <div className="flex justify-start">
-                                    <div className={`p-3 rounded-2xl rounded-tl-none flex gap-1 border ${isDarkMode ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200"
-                                        }`}>
-                                        <div className={`w-1 h-1 rounded-full animate-bounce ${isDarkMode ? "bg-white/40" : "bg-slate-400"}`} />
-                                        <div className={`w-1 h-1 rounded-full animate-bounce [animation-delay:0.2s] ${isDarkMode ? "bg-white/40" : "bg-slate-400"}`} />
-                                        <div className={`w-1 h-1 rounded-full animate-bounce [animation-delay:0.4s] ${isDarkMode ? "bg-white/40" : "bg-slate-400"}`} />
+                                        ))}
                                     </div>
                                 </div>
                             )}
-                        </div>
 
-                        {/* Chat Input */}
-                        <div className={`p-4 border-t ${isDarkMode ? "bg-white/[0.02] border-white/10" : "bg-slate-50 border-slate-100"
-                            }`}>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    value={chatInput}
-                                    onChange={(e) => setChatInput(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                                    placeholder="Ask about your health..."
-                                    className={`flex-1 border rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-[#2ee8a0]/50 transition-colors font-Raleway ${isDarkMode ? "bg-white/5 border-white/10 text-white" : "bg-white border-slate-200 text-slate-800"
-                                        }`}
-                                />
+                            {/* Analyze Button */}
+                            <div className={`p-4 ${isDarkMode ? "bg-white/[0.01]" : "bg-slate-50"}`}>
                                 <button
-                                    onClick={handleSendMessage}
-                                    disabled={!chatInput.trim() || isTyping}
-                                    className="p-2 bg-[#2ee8a0] hover:bg-[#26c085] disabled:opacity-50 disabled:hover:bg-[#2ee8a0] text-[#022633] rounded-xl transition-all duration-300"
+                                    onClick={handleAnalyzeReports}
+                                    disabled={uploadedReports.length === 0 || isAnalyzing}
+                                    className={`w-full py-3 rounded-xl font-Raleway font-semibold text-sm transition-all duration-300 flex items-center justify-center gap-2 ${uploadedReports.length === 0 || isAnalyzing
+                                        ? isDarkMode
+                                            ? "bg-white/[0.03] text-white/30 cursor-not-allowed"
+                                            : "bg-slate-100 text-slate-400 cursor-not-allowed"
+                                        : isDarkMode
+                                            ? "bg-gradient-to-r from-[#2ee8a0] to-[#0f7eee] text-slate-900 hover:shadow-lg hover:shadow-[#2ee8a0]/20"
+                                            : "bg-gradient-to-r from-[#2ee8a0] to-[#0f7eee] text-white hover:shadow-lg"
+                                        }`}
                                 >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" /></svg>
+                                    {isAnalyzing ? (
+                                        <>
+                                            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                            </svg>
+                                            Analyzing Reports...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                            </svg>
+                                            Get Health Tips
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         </div>
-                    </div>
-                ) : (
-                    <button
-                        onClick={() => setIsChatOpen(true)}
-                        className={`w-14 h-14 bg-gradient-to-br from-[#2ee8a0] to-[#0f7eee] rounded-full shadow-lg flex items-center justify-center text-[#022633] hover:scale-110 transition-all duration-300 group ${!isDarkMode && "shadow-slate-200"
-                            }`}
-                    >
-                        <svg className="w-6 h-6 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                        </svg>
-                        {/* Notification badge */}
-                        <div className={`absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 flex items-center justify-center ${isDarkMode ? "border-[#010b10]" : "border-white"
-                            }`}>
-                            <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
-                        </div>
-                    </button>
-                )}
-            </div>
+                        {healthTips.length > 0 && (
+                            <div className="mt-6">
+                                <div className="mb-4">
+                                    <h3 className={`text-lg font-bold font-Raleway ${isDarkMode ? "text-white" : "text-slate-800"}`}>
+                                        Personalized Health Tips
+                                    </h3>
+                                    <p className={`text-xs font-Raleway ${isDarkMode ? "text-white/40" : "text-slate-500"}`}>
+                                        Based on your uploaded reports and current vitals
+                                    </p>
+                                </div>
 
-            {/* ── Global Animations & Scrollbar ── */}
-            <style>{`
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {healthTips.map((tip, idx) => (
+                                        <div
+                                            key={idx}
+                                            className={`backdrop-blur-xl border rounded-2xl p-4 transition-all duration-500 ${isDarkMode
+                                                ? "bg-white/[0.03] border-white/[0.07] hover:bg-white/[0.05] hover:border-white/[0.12]"
+                                                : "bg-white border-slate-200 hover:border-slate-300 shadow-sm hover:shadow-md"
+                                                }`}
+                                        >
+                                            <div className="flex gap-3">
+                                                <div className="flex-shrink-0 pt-0.5">
+                                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: "#2ee8a015" }}>
+                                                        <svg className="w-4 h-4 text-[#2ee8a0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className={`text-sm leading-relaxed font-Raleway ${isDarkMode ? "text-white/80" : "text-slate-700"}`}>
+                                                        {tip}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Footer note */}
+                    <div className="mt-6 text-center">
+                        <p className={`text-[10px] font-Raleway tracking-wider ${isDarkMode ? "text-white/15" : "text-slate-400"}`}>
+                            Data sourced in real-time via Firebase &middot; AD8232 &middot;
+                            MAX30100 &middot; BMP-280
+                        </p>
+                        <h1 className={`text-[15px] mt-3 font-Raleway text-center ${isDarkMode ? "text-[#ECE5E5]" : "text-slate-600"}`}>Made with ❤️ Disha, Aanya, Priyansh</h1>
+                    </div>
+                </div>
+
+                {/* ── Global Animations & Scrollbar ── */}
+                <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 4px;
         }
@@ -1295,8 +1181,123 @@ export default function Dashboard() {
           50%      { opacity: 0.3; transform: scale(1.2); }
         }
       `}</style>
-    </div>
-    </div>
+
+                {/* ── Floating Chat Widget ── */}
+                <div className="fixed bottom-6 right-6 z-50">
+                    {isChatOpen ? (
+                        <div className={`w-[350px] h-[500px] border rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 duration-300 transition-colors ${isDarkMode ? "bg-[#021620] border-white/10" : "bg-white border-slate-200"
+                            }`}>
+                            {/* Chat Header */}
+                            <div className={`p-4 border-b flex items-center justify-between ${isDarkMode ? "bg-gradient-to-r from-[#2ee8a0]/20 to-[#0f7eee]/20 border-white/10" : "bg-slate-50 border-slate-100"
+                                }`}>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-[#2ee8a0] animate-pulse" />
+                                    <span className={`text-sm font-bold font-Raleway ${isDarkMode ? "text-white" : "text-slate-800"}`}>VitalGuard AI</span>
+                                </div>
+                                <button onClick={() => setIsChatOpen(false)} className={`${isDarkMode ? "text-white/40 hover:text-white" : "text-slate-400 hover:text-slate-600"} transition-colors`}>
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                            </div>
+
+                            {/* Messages Box */}
+                            <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-transparent">
+                                {messages.map((msg, i) => (
+                                    <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`max-w-[85%] p-3 rounded-2xl text-xs font-Raleway leading-relaxed ${msg.role === 'user'
+                                            ? 'bg-[#0f7eee] text-white rounded-tr-none'
+                                            : isDarkMode
+                                                ? 'bg-white/5 text-white/90 border border-white/10 rounded-tl-none'
+                                                : 'bg-slate-100 text-slate-700 border border-slate-200 rounded-tl-none'
+                                            }`}>
+                                            {msg.text}
+                                        </div>
+                                    </div>
+                                ))}
+                                {isTyping && (
+                                    <div className="flex justify-start">
+                                        <div className={`p-3 rounded-2xl rounded-tl-none flex gap-1 border ${isDarkMode ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200"
+                                            }`}>
+                                            <div className={`w-1 h-1 rounded-full animate-bounce ${isDarkMode ? "bg-white/40" : "bg-slate-400"}`} />
+                                            <div className={`w-1 h-1 rounded-full animate-bounce [animation-delay:0.2s] ${isDarkMode ? "bg-white/40" : "bg-slate-400"}`} />
+                                            <div className={`w-1 h-1 rounded-full animate-bounce [animation-delay:0.4s] ${isDarkMode ? "bg-white/40" : "bg-slate-400"}`} />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Chat Input */}
+                            <div className={`p-4 border-t ${isDarkMode ? "bg-white/[0.02] border-white/10" : "bg-slate-50 border-slate-100"
+                                }`}>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={chatInput}
+                                        onChange={(e) => setChatInput(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                                        placeholder="Ask about your health..."
+                                        className={`flex-1 border rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-[#2ee8a0]/50 transition-colors font-Raleway ${isDarkMode ? "bg-white/5 border-white/10 text-white" : "bg-white border-slate-200 text-slate-800"
+                                            }`}
+                                    />
+                                    <button
+                                        onClick={handleSendMessage}
+                                        disabled={!chatInput.trim() || isTyping}
+                                        className="p-2 bg-[#2ee8a0] hover:bg-[#26c085] disabled:opacity-50 disabled:hover:bg-[#2ee8a0] text-[#022633] rounded-xl transition-all duration-300"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" /></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <button
+                            onClick={() => setIsChatOpen(true)}
+                            className={`w-14 h-14 bg-gradient-to-br from-[#2ee8a0] to-[#0f7eee] rounded-full shadow-lg flex items-center justify-center text-[#022633] hover:scale-110 transition-all duration-300 group ${!isDarkMode && "shadow-slate-200"
+                                }`}
+                        >
+                            <svg className="w-6 h-6 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                            </svg>
+                            {/* Notification badge */}
+                            <div className={`absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 flex items-center justify-center ${isDarkMode ? "border-[#010b10]" : "border-white"
+                                }`}>
+                                <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
+                            </div>
+                        </button>
+                    )}
+                </div>
+
+                {/* ── Global Animations & Scrollbar ── */}
+                <style>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 10px;
+        }
+        @keyframes heartBeat {
+          0%   { transform: scale(1); }
+          14%  { transform: scale(1.25); }
+          28%  { transform: scale(1); }
+          42%  { transform: scale(1.15); }
+          56%  { transform: scale(1); }
+          100% { transform: scale(1); }
+        }
+        @keyframes heartPulseRing {
+          0%   { transform: scale(0.8); opacity: 0.4; }
+          50%  { transform: scale(1.4); opacity: 0; }
+          100% { transform: scale(0.8); opacity: 0; }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 0.1; transform: scale(1); }
+          50%      { opacity: 0.3; transform: scale(1.2); }
+        }
+      `}</style>
+            </div>
+        </div>
     );
 }
 
