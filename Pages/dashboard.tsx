@@ -959,6 +959,7 @@ export default function Dashboard() {
                         <h2 className={`text-2xl md:text-3xl font-bold font-Raleway tracking-tight ${isDarkMode ? "text-white" : "text-slate-800"}`}>
                             AI Health Insights
                         </h2>
+
                     </div>
 
                     {/* Upload & Analysis Section */}
