@@ -12,6 +12,7 @@ interface UserData {
 }
 
 
+
 function ECGGraph({ ecgData }: { ecgData: number[] }) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
