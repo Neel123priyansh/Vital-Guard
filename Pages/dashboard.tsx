@@ -951,9 +951,6 @@ export default function Dashboard() {
                     </MetricCard>
                 </div>
 
-                {/* ════════════════════════════════════════════════════════════════════
-            HEALTH REPORTS SECTION
-        ════════════════════════════════════════════════════════════════════ */}
                 <div className="mt-8 mb-6">
                     <div className="mb-4">
                         <p className={`text-[10px] font-Raleway font-bold tracking-[0.2em] uppercase ${isDarkMode ? "text-white/30" : "text-slate-400"}`}>
