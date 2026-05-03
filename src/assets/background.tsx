@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, memo } from 'react';
 import {
     Clock,
     Mesh,
@@ -251,14 +251,19 @@ function hexToVec3(hex: string): Vector3 {
     return new Vector3(r / 255, g / 255, b / 255);
 }
 
-export default function FloatingLines({
+const DEFAULT_ENABLED_WAVES: Array<'top' | 'middle' | 'bottom'> = ['top', 'middle', 'bottom'];
+const DEFAULT_LINE_COUNT = [6];
+const DEFAULT_LINE_DISTANCE = [5];
+const DEFAULT_BOTTOM_WAVE_POSITION = { x: 2.0, y: -0.7, rotate: -1 };
+
+const FloatingLines = memo(({
     linesGradient,
-    enabledWaves = ['top', 'middle', 'bottom'],
-    lineCount = [6],
-    lineDistance = [5],
+    enabledWaves = DEFAULT_ENABLED_WAVES,
+    lineCount = DEFAULT_LINE_COUNT,
+    lineDistance = DEFAULT_LINE_DISTANCE,
     topWavePosition,
     middleWavePosition,
-    bottomWavePosition = { x: 2.0, y: -0.7, rotate: -1 },
+    bottomWavePosition = DEFAULT_BOTTOM_WAVE_POSITION,
     animationSpeed = 1,
     interactive = true,
     bendRadius = 5.0,
@@ -267,7 +272,7 @@ export default function FloatingLines({
     parallax = true,
     parallaxStrength = 0.2,
     mixBlendMode = 'screen'
-}: FloatingLinesProps) {
+}: FloatingLinesProps) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const targetMouseRef = useRef<Vector2>(new Vector2(-1000, -1000));
     const currentMouseRef = useRef<Vector2>(new Vector2(-1000, -1000));
@@ -509,4 +514,6 @@ export default function FloatingLines({
             }}
         />
     );
-}
+});
+
+export default FloatingLines;

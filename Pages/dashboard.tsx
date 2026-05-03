@@ -461,6 +461,7 @@ export default function Dashboard() {
             });
 
             const response = await axios.post(
+                // For local development, use: 'http://localhost:8000/api/analyze-reports'
                 'https://vitalguard-llm.onrender.com/api/analyze-reports',
                 formData,
                 {
